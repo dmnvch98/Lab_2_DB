@@ -9,6 +9,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Data
 @AllArgsConstructor
@@ -56,22 +58,23 @@ public class DatabaseManager {
     public List<ForeignKeyInfo> getForeignKeyInfos(String tableName) throws SQLException {
         List<ForeignKeyInfo> foreignKeyInfos = new ArrayList<>();
         ResultSet resultSet = executeQuery("SHOW CREATE TABLE " + tableName);
+        String patternString = "CONSTRAINT `(\\w+)` FOREIGN KEY \\(`(.+?)`\\) REFERENCES `(\\w+)` \\(`(.+?)`\\)";
+        Pattern pattern = Pattern.compile(patternString);
 
         while (resultSet.next()) {
             String createTableStatement = resultSet.getString(2);
-            String[] lines = createTableStatement.split("\\r?\\n");
-            for (String line : lines) {
-                if (line.contains("FOREIGN KEY")) {
-                    String[] words = line.split("\\s+");
-                    String constraintName = words[2];
-                    String columnName = words[3].substring(1, words[3].length() - 1);
-                    String referencedTableName = words[5];
-                    String referencedColumnName = words[6].substring(1, words[6].length() - 1);
-                    ForeignKeyInfo foreignKeyInfo = new ForeignKeyInfo(constraintName, "[table_name]", columnName, referencedTableName, referencedColumnName);
-                    foreignKeyInfos.add(foreignKeyInfo);
-                }
+            Matcher matcher = pattern.matcher(createTableStatement);
+
+            while (matcher.find()) {
+                String constraintName = matcher.group(1);
+                String columnName = matcher.group(2);
+                String referencedTableName = matcher.group(3);
+                String referencedColumnName = matcher.group(4);
+                ForeignKeyInfo foreignKeyInfo = new ForeignKeyInfo(constraintName, tableName, columnName, referencedTableName, referencedColumnName);
+                foreignKeyInfos.add(foreignKeyInfo);
             }
         }
+
         return foreignKeyInfos;
     }
 

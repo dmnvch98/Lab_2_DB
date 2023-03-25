@@ -8,6 +8,5 @@ module com.example.lab_2_db {
 
     opens com.example.lab_2_db to javafx.fxml;
     exports com.example.lab_2_db;
-    opens com.example.lab_2_db.model to javafx.base;
     opens com.example.lab_2_db.database to javafx.base;
 }

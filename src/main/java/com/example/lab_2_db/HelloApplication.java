@@ -1,9 +1,7 @@
 package com.example.lab_2_db;
 
-import com.example.lab_2_db.database.DBVIz;
 import com.example.lab_2_db.database.DBVisualizer;
 import com.example.lab_2_db.database.DatabaseManager;
-import com.example.lab_2_db.model.Client;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
