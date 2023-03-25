@@ -1,0 +1,13 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:13.4-alpine
+    container_name: lab-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bsuir
+    ports:
+      - "35433:5432"
+#    volumes:
+#      - ./init-scripts:/docker-entrypoint-initdb.d
