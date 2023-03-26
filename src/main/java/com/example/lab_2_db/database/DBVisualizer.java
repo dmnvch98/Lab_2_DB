@@ -87,40 +87,7 @@ public class DBVisualizer {
                         TableColumn<ObservableList<String>, String> column = new TableColumn<>(metaData.getColumnName(i));
                         column.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().get(colNo)));
                         column.setCellFactory(TextFieldTableCell.forTableColumn());
-                        column.setOnEditCommit(eventEdit -> {
-                            String newValue = eventEdit.getNewValue();
-                            ObservableList<String> rowValue = eventEdit.getTableView().getItems().get(eventEdit.getTablePosition().getRow());
-                            String oldValue = rowValue.get(colNo);
-                            if (!newValue.equals(oldValue)) {
-                                try {
-                                    String updateQuery = "UPDATE " + selectedTableInfo.getName() + " SET " + metaData.getColumnName(colNo + 1) + "='" + newValue + "' WHERE ";
-                                    for (int j = 1; j <= metaData.getColumnCount(); j++) {
-                                        if (j != colNo + 1) {
-                                            updateQuery += metaData.getColumnName(j) + "='" + rowValue.get(j - 1) + "' AND ";
-                                        }
-                                    }
-                                    updateQuery = updateQuery.substring(0, updateQuery.length() - 5);
-                                    long startTime = System.currentTimeMillis();
-                                    int rowsUpdated = databaseManager.executeUpdate(updateQuery);
-                                    long endTime = System.currentTimeMillis();
-                                    executionTime.set(endTime - startTime);
-
-                                    InfoAlert updateAlert = InfoAlert
-                                        .builder()
-                                        .message("Rows get: " + rowsUpdated + "\nExecution time: " + executionTime + " ms")
-                                        .build();
-                                    updateAlert.showAlert();
-
-                                } catch (SQLException e) {
-                                    ErrorAlert errorAlert = ErrorAlert
-                                        .builder()
-                                        .message("Error updating value in database: " + e.getMessage())
-                                        .build();
-                                    errorAlert.showAlert();
-                                }
-                            }
-                            rowValue.set(colNo, newValue);
-                        });
+                        column.setOnEditCommit(eventEdit -> updateTable(eventEdit, colNo, selectedTableInfo, metaData));
                         tableView.getColumns().add(column);
                     }
                 } catch (SQLException e) {
@@ -195,6 +162,45 @@ public class DBVisualizer {
         referencedColumnNameColumn.setCellValueFactory(new PropertyValueFactory<>("referencedColumnName"));
         foreignKeyTable.getColumns().addAll(constraintNameColumn, tableNameColumn, columnNameColumn, referencedTableNameColumn, referencedColumnNameColumn);
 
+    }
+
+    private void updateTable(TableColumn.CellEditEvent<ObservableList<String>, String> editEvent, int colNo,
+                             TableInfo selectedTableInfo, ResultSetMetaData metaData) {
+        String newValue = editEvent.getNewValue();
+        ObservableList<String> rowValue = editEvent.getTableView().getItems().get(editEvent.getTablePosition().getRow());
+        String oldValue = rowValue.get(colNo);
+        if (!newValue.equals(oldValue)) {
+            try {
+                String updateQuery = "UPDATE " + selectedTableInfo.getName() + " SET " + metaData.getColumnName(colNo + 1) + "='" + newValue + "' WHERE ";
+                for (int j = 1; j <= metaData.getColumnCount(); j++) {
+                    if (j != colNo + 1) {
+                        updateQuery += metaData.getColumnName(j) + "='" + rowValue.get(j - 1) + "' AND ";
+                    }
+                }
+                updateQuery = updateQuery.substring(0, updateQuery.length() - 5);
+
+                long startTime = System.currentTimeMillis();
+
+                int rowsUpdated = databaseManager.executeUpdate(updateQuery);
+
+                long endTime = System.currentTimeMillis();
+                AtomicLong executionTime = new AtomicLong(endTime - startTime);
+
+                InfoAlert updateAlert = InfoAlert
+                    .builder()
+                    .message("Rows get: " + rowsUpdated + "\nExecution time: " + executionTime + " ms")
+                    .build();
+                updateAlert.showAlert();
+
+            } catch (SQLException e) {
+                ErrorAlert errorAlert = ErrorAlert
+                    .builder()
+                    .message("Error updating value in database: " + e.getMessage())
+                    .build();
+                errorAlert.showAlert();
+            }
+        }
+        rowValue.set(colNo, newValue);
     }
 }
 
