@@ -3,10 +3,7 @@ package com.example.lab_2_db.database;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -65,28 +62,50 @@ public class DatabaseManager {
         return "";
     }
 
-    public List<ForeignKeyInfo> getForeignKeyInfos(String tableName) throws SQLException {
-        List<ForeignKeyInfo> foreignKeyInfos = new ArrayList<>();
-        ResultSet resultSet = executeQuery("SHOW CREATE TABLE " + tableName);
-        String patternString = "CONSTRAINT `(\\w+)` FOREIGN KEY \\(`(.+?)`\\) REFERENCES `(\\w+)` \\(`(.+?)`\\)";
-        Pattern pattern = Pattern.compile(patternString);
+//    public List<ForeignKeyInfo> getForeignKeyInfos(String tableName) throws SQLException {
+//        List<ForeignKeyInfo> foreignKeyInfos = new ArrayList<>();
+//        ResultSet resultSet = executeQuery("SHOW CREATE TABLE " + tableName);
+//        String patternString = "CONSTRAINT `(\\w+)` FOREIGN KEY \\(`(.+?)`\\) REFERENCES `(\\w+)` \\(`(.+?)`\\)";
+//        Pattern pattern = Pattern.compile(patternString);
+//
+//        while (resultSet.next()) {
+//            String createTableStatement = resultSet.getString(2);
+//            Matcher matcher = pattern.matcher(createTableStatement);
+//
+//            while (matcher.find()) {
+//                String constraintName = matcher.group(1);
+//                String columnName = matcher.group(2);
+//                String referencedTableName = matcher.group(3);
+//                String referencedColumnName = matcher.group(4);
+//                ForeignKeyInfo foreignKeyInfo = new ForeignKeyInfo(constraintName, tableName, columnName, referencedTableName, referencedColumnName);
+//                foreignKeyInfos.add(foreignKeyInfo);
+//            }
+//        }
+//
+//        return foreignKeyInfos;
+//    }
+public List<ForeignKeyInfo> getForeignKeyInfos(String tableName) throws SQLException {
+    List<ForeignKeyInfo> foreignKeyInfos = new ArrayList<>();
+    String query = "SELECT i.TABLE_NAME, i.CONSTRAINT_NAME, k.COLUMN_NAME, k.REFERENCED_TABLE_NAME, k.REFERENCED_COLUMN_NAME " +
+        "FROM information_schema.TABLE_CONSTRAINTS i " +
+        "LEFT JOIN information_schema.KEY_COLUMN_USAGE k ON i.CONSTRAINT_NAME = k.CONSTRAINT_NAME " +
+        "WHERE i.CONSTRAINT_TYPE = 'FOREIGN KEY' " +
+        "AND i.TABLE_SCHEMA = DATABASE() " +
+        "AND i.TABLE_NAME = ?";
+    PreparedStatement statement = connection.prepareStatement(query);
+    statement.setString(1, tableName);
+    ResultSet resultSet = statement.executeQuery();
 
-        while (resultSet.next()) {
-            String createTableStatement = resultSet.getString(2);
-            Matcher matcher = pattern.matcher(createTableStatement);
-
-            while (matcher.find()) {
-                String constraintName = matcher.group(1);
-                String columnName = matcher.group(2);
-                String referencedTableName = matcher.group(3);
-                String referencedColumnName = matcher.group(4);
-                ForeignKeyInfo foreignKeyInfo = new ForeignKeyInfo(constraintName, tableName, columnName, referencedTableName, referencedColumnName);
-                foreignKeyInfos.add(foreignKeyInfo);
-            }
-        }
-
-        return foreignKeyInfos;
+    while (resultSet.next()) {
+        String constraintName = resultSet.getString("CONSTRAINT_NAME");
+        String columnName = resultSet.getString("COLUMN_NAME");
+        String referencedTableName = resultSet.getString("REFERENCED_TABLE_NAME");
+        String referencedColumnName = resultSet.getString("REFERENCED_COLUMN_NAME");
+        ForeignKeyInfo foreignKeyInfo = new ForeignKeyInfo(constraintName, tableName, columnName, referencedTableName, referencedColumnName);
+        foreignKeyInfos.add(foreignKeyInfo);
     }
 
+    return foreignKeyInfos;
+}
 
 }

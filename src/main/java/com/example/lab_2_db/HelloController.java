@@ -1,9 +1,6 @@
 package com.example.lab_2_db;
 
-import com.example.lab_2_db.database.DatabaseManager;
-import com.example.lab_2_db.database.TableContentVisualizer;
-import com.example.lab_2_db.database.TableInfo;
-import com.example.lab_2_db.database.TableInfoVisuallizer;
+import com.example.lab_2_db.database.*;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -39,6 +36,9 @@ public class HelloController implements Initializable {
     @FXML
     private TableView<TableInfo> tablesInfo;
 
+    @FXML
+    private TableView<ForeignKeyInfo> foreignKeyInfo;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         initDB();
@@ -70,9 +70,11 @@ public class HelloController implements Initializable {
         tablesInfo.setItems(tableView.getItems());
     }
     @FXML
-    private void initTableContent() {
+    private void initTableContent() throws SQLException {
+        TableInfo selectedTableInfo = tablesInfo.getSelectionModel().getSelectedItem();
         tableContentVisualizer = new TableContentVisualizer(databaseManager);
-        tableContent.setItems(tableContentVisualizer.getTableContent(tablesInfo.getSelectionModel().getSelectedItem(), tableContent).getItems());
+        tableContent.setItems(tableContentVisualizer.getTableContent(selectedTableInfo, tableContent).getItems());
+        initForeignKeyInfo(selectedTableInfo.getName());
     }
 
     @FXML
@@ -87,5 +89,12 @@ public class HelloController implements Initializable {
     @FXML
     public void updateRow() {
         tableContentVisualizer.updateTable(tableContent, tablesInfo.getSelectionModel().getSelectedItem());
+    }
+
+    public void initForeignKeyInfo(String selectedTable) throws SQLException {
+        ForeignKeyVisualizer foreignKeyVisualizer = new ForeignKeyVisualizer(databaseManager);
+        TableView<ForeignKeyInfo> foreignKeyInfo1 =
+            foreignKeyVisualizer.showForeignKeyInfo(foreignKeyInfo, selectedTable);
+        foreignKeyInfo.setItems(foreignKeyInfo1.getItems());
     }
 }

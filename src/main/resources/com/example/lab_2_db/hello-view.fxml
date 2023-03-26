@@ -7,7 +7,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.lab_2_db.HelloController">
         <children>
-            <TableView fx:id="tablesInfo" prefHeight="173.0" prefWidth="557.0">
+            <TableView fx:id="tablesInfo" prefHeight="173.0" prefWidth="457.0">
             </TableView>
             <ButtonBar layoutX="155.0" layoutY="315.0" prefHeight="40.0" prefWidth="200.0" />
             <Button id="showTableContent" fx:id="showTableContent" layoutX="10.0" layoutY="183.0" mnemonicParsing="false" onMouseClicked="#initTableContent" text="Show table content" />
@@ -15,5 +15,6 @@
       <Button fx:id="deleteContentTableRow" layoutX="155.0" layoutY="183.0" mnemonicParsing="false" onMouseClicked="#deleteContentTableRow" text="Delete row" />
       <Button fx:id="updateRow" layoutX="254.0" layoutY="183.0" mnemonicParsing="false" onAction="#updateRow" onMouseClicked="#updateRow" text="Update row" />
       <Button fx:id="updateRow1" layoutX="355.0" layoutY="183.0" mnemonicParsing="false" onAction="#addRow" onMouseClicked="#addRow" text="Add row" />
+      <TableView fx:id="foreignKeyInfo" layoutX="455.0" prefHeight="173.0" prefWidth="545.0" />
         </children>
     </AnchorPane>
