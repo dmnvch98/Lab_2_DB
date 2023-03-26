@@ -48,11 +48,20 @@ public class DatabaseManager {
         while (resultSet.next()) {
             String name = resultSet.getString("Name");
             String engine = resultSet.getString("Engine");
-            TableInfo tableInfo = new TableInfo(name, engine);
+            String primaryKey = getPrimaryKeyName(name);
+            TableInfo tableInfo = new TableInfo(name, engine, primaryKey);
             tableInfos.add(tableInfo);
         }
 
         return tableInfos;
+    }
+
+    private String getPrimaryKeyName(String table) throws SQLException {
+        ResultSet resultSet = executeQuery("SHOW INDEX FROM " + table + " WHERE Key_name = 'PRIMARY';");
+        while (resultSet.next()) {
+            return resultSet.getString("Column_name");
+        }
+        return "";
     }
 
     public List<ForeignKeyInfo> getForeignKeyInfos(String tableName) throws SQLException {

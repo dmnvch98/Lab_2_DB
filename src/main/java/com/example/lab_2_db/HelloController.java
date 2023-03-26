@@ -9,9 +9,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
+import javafx.scene.input.MouseEvent;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.w3c.dom.events.MouseEvent;
 
 import java.net.URL;
 import java.sql.Connection;
@@ -23,10 +23,13 @@ import java.util.ResourceBundle;
 @NoArgsConstructor
 public class HelloController implements Initializable {
     private DatabaseManager databaseManager;
-
+    private TableContentVisualizer tableContentVisualizer;
+    @FXML
+    public Button addRow;
     @FXML
     private Button showTableContent;
-
+    @FXML
+    private Button deleteContentTableRow;
     @FXML
     private TableView<ObservableList<String>> tableContent;
 
@@ -65,7 +68,17 @@ public class HelloController implements Initializable {
     }
     @FXML
     private void initTableContent() {
-        TableContentVisualizer tableContentVisualizer = new TableContentVisualizer(databaseManager);
-        tableContent.setItems(tableContentVisualizer.getTableContent(tablesInfo, tableContent).getItems());
+        tableContentVisualizer = new TableContentVisualizer(databaseManager);
+        tableContent.setItems(tableContentVisualizer.getTableContent(tablesInfo.getSelectionModel().getSelectedItem(), tableContent).getItems());
+    }
+
+    @FXML
+    void deleteContentTableRow() {
+        tableContentVisualizer.deleteSelectedRow(tableContent, tablesInfo.getSelectionModel().getSelectedItem());
+    }
+
+    @FXML
+    public void addRow() throws SQLException {
+        tableContentVisualizer.addRow(tableContent, tablesInfo.getSelectionModel().getSelectedItem());
     }
 }

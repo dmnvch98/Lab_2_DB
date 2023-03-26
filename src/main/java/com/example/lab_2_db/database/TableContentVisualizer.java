@@ -19,9 +19,13 @@ import java.util.concurrent.atomic.AtomicLong;
 @Data
 @AllArgsConstructor
 public class TableContentVisualizer {
+    public TableContentVisualizer(DatabaseManager databaseManager) {
+        this.databaseManager = databaseManager;
+    }
+
     private final DatabaseManager databaseManager;
-    public TableView<ObservableList<String>> getTableContent(TableView<TableInfo> tableTable, TableView<ObservableList<String>> tableView) {
-        TableInfo selectedTableInfo = tableTable.getSelectionModel().getSelectedItem();
+    private ResultSetMetaData metaData;
+    public TableView<ObservableList<String>> getTableContent(TableInfo selectedTableInfo, TableView<ObservableList<String>> tableView) {
         if (selectedTableInfo == null) {
             return null;
         }
@@ -32,7 +36,7 @@ public class TableContentVisualizer {
             long getTableInfoEndTime = System.currentTimeMillis();
             AtomicLong executionTime = new AtomicLong(getTableInfoEndTime - getTableInfoStartTime);
 
-            ResultSetMetaData metaData = rs.getMetaData();
+            metaData = rs.getMetaData();
             ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
             int count = 0;
 
@@ -62,6 +66,13 @@ public class TableContentVisualizer {
                 column.setOnEditCommit(eventEdit -> updateTable(eventEdit, colNo, selectedTableInfo, metaData));
                 tableView.getColumns().add(column);
             }
+            // Пустая строка для вставки новой строки
+            ObservableList<String> newRow = FXCollections.observableArrayList();
+            for (int i = 0; i < metaData.getColumnCount(); i++) {
+                newRow.add("");
+            }
+            tableView.getItems().add(newRow);
+
         } catch (SQLException e) {
             ErrorAlert errorAlert = ErrorAlert
                 .builder()
@@ -74,29 +85,32 @@ public class TableContentVisualizer {
 
     private void updateTable(TableColumn.CellEditEvent<ObservableList<String>, String> editEvent, int colNo,
                              TableInfo selectedTableInfo, ResultSetMetaData metaData) {
+        if (editEvent.getNewValue() == null || editEvent.getNewValue().isEmpty()) {
+            return;
+        }
         String newValue = editEvent.getNewValue();
+
         ObservableList<String> rowValue = editEvent.getTableView().getItems().get(editEvent.getTablePosition().getRow());
+
         String oldValue = rowValue.get(colNo);
+        String primaryKeyValue = rowValue.get(0);
+
         if (!newValue.equals(oldValue)) {
             try {
-                StringBuilder updateQuery = new StringBuilder("UPDATE " + selectedTableInfo.getName() + " SET " + metaData.getColumnName(colNo + 1) + "='" + newValue + "' WHERE ");
-                for (int j = 1; j <= metaData.getColumnCount(); j++) {
-                    if (j != colNo + 1) {
-                        updateQuery.append(metaData.getColumnName(j)).append("='").append(rowValue.get(j - 1)).append("' AND ");
-                    }
-                }
-                updateQuery = new StringBuilder(updateQuery.substring(0, updateQuery.length() - 5));
+                String updateQuery = "UPDATE " + selectedTableInfo.getName() +
+                    " SET " + metaData.getColumnName(colNo + 1) + "='" + newValue +
+                    "' WHERE " + selectedTableInfo.getPrimaryKey() + " = " + primaryKeyValue;
 
                 long startTime = System.currentTimeMillis();
 
-                int rowsUpdated = databaseManager.executeUpdate(updateQuery.toString());
+                int rowsUpdated = databaseManager.executeUpdate(updateQuery);
 
                 long endTime = System.currentTimeMillis();
                 AtomicLong executionTime = new AtomicLong(endTime - startTime);
 
                 InfoAlert updateAlert = InfoAlert
                     .builder()
-                    .message("Rows get: " + rowsUpdated + "\nExecution time: " + executionTime + " ms")
+                    .message("Rows updated: " + rowsUpdated + "\nExecution time: " + executionTime + " ms")
                     .build();
                 updateAlert.showAlert();
 
@@ -110,4 +124,65 @@ public class TableContentVisualizer {
         }
         rowValue.set(colNo, newValue);
     }
+
+    public void deleteSelectedRow(TableView<ObservableList<String>> tableView, TableInfo selectedTableInfo) {
+        ObservableList<ObservableList<String>> selectedRows = tableView.getSelectionModel().getSelectedItems();
+        if (selectedRows.isEmpty()) {
+            return;
+        }
+        ObservableList<String> selectedRow = selectedRows.get(0);
+        String primaryKeyValue = selectedRow.get(0);
+        try {
+            String deleteQuery = "DELETE FROM " + selectedTableInfo.getName() + " WHERE " + selectedTableInfo.getPrimaryKey() + " = '" + primaryKeyValue + "'";
+            long startTime = System.currentTimeMillis();
+            int rowsUpdated = databaseManager.executeUpdate(deleteQuery);
+            long endTime = System.currentTimeMillis();
+            tableView.getItems().remove(selectedRow);
+            AtomicLong executionTime = new AtomicLong(endTime - startTime);
+
+            InfoAlert alert = InfoAlert
+                .builder()
+                .message("Rows deleted: " + rowsUpdated + "\nExecution time: " + executionTime + " ms")
+                .build();
+            alert.showAlert();
+        } catch (SQLException e) {
+            ErrorAlert errorAlert = ErrorAlert
+                .builder()
+                .message("Error deleting row: " + e.getMessage())
+                .build();
+            errorAlert.showAlert();
+        }
+    }
+
+    public void addRow(TableView<ObservableList<String>> tableView, TableInfo selectedTableInfo) throws SQLException {
+        ObservableList<String> lastRow = tableView.getItems().get(tableView.getItems().size() - 1);
+        StringBuilder query = new StringBuilder("INSERT INTO " + selectedTableInfo.getName() + " VALUES (");
+        for (int i = 0; i < metaData.getColumnCount(); i++) {
+            String value = lastRow.get(i);
+            query.append("'").append(value).append("'");
+            if (i < metaData.getColumnCount() - 1) {
+                query.append(",");
+            }
+        }
+        query.append(")");
+        try {
+            long startTime = System.currentTimeMillis();
+            int rowsInserted = databaseManager.executeUpdate(query.toString());
+            long endTime = System.currentTimeMillis();
+            AtomicLong executionTime = new AtomicLong(endTime - startTime);
+            InfoAlert infoAlert = InfoAlert
+                .builder()
+                .message("Rows inserted: " + rowsInserted + "\nExecution time: " + executionTime + " ms")
+                .build();
+            infoAlert.showAlert();
+        } catch (SQLException e) {
+            ErrorAlert errorAlert = ErrorAlert
+                .builder()
+                .message("Error inserting row: " + e.getMessage())
+                .build();
+            errorAlert.showAlert();
+        }
+
+    }
+
 }

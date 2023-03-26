@@ -35,9 +35,14 @@ public class TableInfoVisuallizer {
 
         TableColumn<TableInfo, String> nameColumn = new TableColumn<>("Table Name");
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+
         TableColumn<TableInfo, String> engineColumn = new TableColumn<>("Engine");
         engineColumn.setCellValueFactory(new PropertyValueFactory<>("engine"));
-        tableInfo.getColumns().addAll(nameColumn, engineColumn);
+
+        TableColumn<TableInfo, String> primaryKeyColumn = new TableColumn<>("Primary key");
+        primaryKeyColumn.setCellValueFactory(new PropertyValueFactory<>("primaryKey"));
+
+        tableInfo.getColumns().addAll(nameColumn, engineColumn, primaryKeyColumn);
         return tableInfo;
     }
 
