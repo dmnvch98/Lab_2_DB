@@ -5,6 +5,7 @@ import com.example.lab_2_db.database.TableContentVisualizer;
 import com.example.lab_2_db.database.TableInfo;
 import com.example.lab_2_db.database.TableInfoVisuallizer;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -24,6 +25,8 @@ import java.util.ResourceBundle;
 public class HelloController implements Initializable {
     private DatabaseManager databaseManager;
     private TableContentVisualizer tableContentVisualizer;
+    @FXML
+    public Button updateRow;
     @FXML
     public Button addRow;
     @FXML
@@ -80,5 +83,9 @@ public class HelloController implements Initializable {
     @FXML
     public void addRow() throws SQLException {
         tableContentVisualizer.addRow(tableContent, tablesInfo.getSelectionModel().getSelectedItem());
+    }
+    @FXML
+    public void updateRow() {
+        tableContentVisualizer.updateTable(tableContent, tablesInfo.getSelectionModel().getSelectedItem());
     }
 }

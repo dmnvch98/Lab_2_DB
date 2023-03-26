@@ -25,6 +25,8 @@ public class TableContentVisualizer {
 
     private final DatabaseManager databaseManager;
     private ResultSetMetaData metaData;
+    private ObservableList<String> currentRow;
+
     public TableView<ObservableList<String>> getTableContent(TableInfo selectedTableInfo, TableView<ObservableList<String>> tableView) {
         if (selectedTableInfo == null) {
             return null;
@@ -55,6 +57,12 @@ public class TableContentVisualizer {
                 .build();
             infoAlert.showAlert();
 
+            currentRow = FXCollections.observableArrayList();
+            for (int i = 0; i < metaData.getColumnCount(); i++) {
+                currentRow.add("");
+            }
+
+
             tableView.setEditable(true);
             tableView.setItems(data);
             tableView.getColumns().clear();
@@ -63,15 +71,20 @@ public class TableContentVisualizer {
                 TableColumn<ObservableList<String>, String> column = new TableColumn<>(metaData.getColumnName(i));
                 column.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().get(colNo)));
                 column.setCellFactory(TextFieldTableCell.forTableColumn());
-                column.setOnEditCommit(eventEdit -> updateTable(eventEdit, colNo, selectedTableInfo, metaData));
+
+                column.setOnEditCommit(event -> {
+                    currentRow.set(colNo, event.getNewValue());
+                });
                 tableView.getColumns().add(column);
             }
-            // Пустая строка для вставки новой строки
-            ObservableList<String> newRow = FXCollections.observableArrayList();
-            for (int i = 0; i < metaData.getColumnCount(); i++) {
-                newRow.add("");
-            }
-            tableView.getItems().add(newRow);
+//            // Пустая строка для вставки новой строки
+            tableView.getItems().add(currentRow);
+
+//            ObservableList<String> newRow = FXCollections.observableArrayList();
+//            for (int i = 0; i < metaData.getColumnCount(); i++) {
+//                newRow.add("");
+//            }
+//            tableView.getItems().add(newRow);
 
         } catch (SQLException e) {
             ErrorAlert errorAlert = ErrorAlert
@@ -83,46 +96,57 @@ public class TableContentVisualizer {
         return tableView;
     }
 
-    private void updateTable(TableColumn.CellEditEvent<ObservableList<String>, String> editEvent, int colNo,
-                             TableInfo selectedTableInfo, ResultSetMetaData metaData) {
-        if (editEvent.getNewValue() == null || editEvent.getNewValue().isEmpty()) {
+    public void updateTable(TableView<ObservableList<String>> tableView, TableInfo selectedTableInfo) {
+        if (currentRow == null || currentRow.isEmpty()) {
             return;
         }
-        String newValue = editEvent.getNewValue();
-
-        ObservableList<String> rowValue = editEvent.getTableView().getItems().get(editEvent.getTablePosition().getRow());
-
-        String oldValue = rowValue.get(colNo);
-        String primaryKeyValue = rowValue.get(0);
-
-        if (!newValue.equals(oldValue)) {
-            try {
-                String updateQuery = "UPDATE " + selectedTableInfo.getName() +
-                    " SET " + metaData.getColumnName(colNo + 1) + "='" + newValue +
-                    "' WHERE " + selectedTableInfo.getPrimaryKey() + " = " + primaryKeyValue;
-
-                long startTime = System.currentTimeMillis();
-
-                int rowsUpdated = databaseManager.executeUpdate(updateQuery);
-
-                long endTime = System.currentTimeMillis();
-                AtomicLong executionTime = new AtomicLong(endTime - startTime);
-
-                InfoAlert updateAlert = InfoAlert
-                    .builder()
-                    .message("Rows updated: " + rowsUpdated + "\nExecution time: " + executionTime + " ms")
-                    .build();
-                updateAlert.showAlert();
-
-            } catch (SQLException e) {
-                ErrorAlert errorAlert = ErrorAlert
-                    .builder()
-                    .message("Error updating value in database: " + e.getMessage())
-                    .build();
-                errorAlert.showAlert();
-            }
+        ObservableList<ObservableList<String>> selectedRows = tableView.getSelectionModel().getSelectedItems();
+        if (selectedRows.isEmpty()) {
+            return;
         }
-        rowValue.set(colNo, newValue);
+        ObservableList<String> selectedRow = selectedRows.get(0);
+        String primaryKeyValue = selectedRow.get(0);
+
+        try {
+            String tableName = selectedTableInfo.getName();
+            StringBuilder queryBuilder = new StringBuilder("UPDATE " + tableName + " SET ");
+            for (int i = 0; i < metaData.getColumnCount(); i++) {
+                String columnName = metaData.getColumnName(i + 1);
+                String columnValue = currentRow.get(i);
+                if (!columnValue.equals("")) {
+                    queryBuilder.append(columnName).append("=").append("'").append(columnValue).append("'");
+                    if (i < metaData.getColumnCount() - 1) {
+                        queryBuilder.append(",");
+                    }
+                }
+
+            }
+
+            queryBuilder
+                .append(" WHERE ")
+                .append(selectedTableInfo.getPrimaryKey())
+                .append("=")
+                .append(primaryKeyValue);
+
+            String updateQuery = queryBuilder.toString();
+
+            long startTime = System.currentTimeMillis();
+            int rowsUpdated = databaseManager.executeUpdate(updateQuery);
+            long endTime = System.currentTimeMillis();
+            AtomicLong executionTime = new AtomicLong(endTime - startTime);
+
+            InfoAlert updateAlert = InfoAlert
+                .builder()
+                .message("Rows updated: " + rowsUpdated + "\nExecution time: " + executionTime + " ms")
+                .build();
+            updateAlert.showAlert();
+        } catch (SQLException e) {
+            ErrorAlert errorAlert = ErrorAlert
+                .builder()
+                .message("Error updating value in database: " + e.getMessage())
+                .build();
+            errorAlert.showAlert();
+        }
     }
 
     public void deleteSelectedRow(TableView<ObservableList<String>> tableView, TableInfo selectedTableInfo) {
