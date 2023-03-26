@@ -14,5 +14,6 @@
             <TableView fx:id="tableContent" layoutY="214.0" prefHeight="200.0" prefWidth="1000.0" />
       <Button fx:id="deleteContentTableRow" layoutX="155.0" layoutY="183.0" mnemonicParsing="false" onMouseClicked="#deleteContentTableRow" text="Delete row" />
       <Button fx:id="updateRow" layoutX="254.0" layoutY="183.0" mnemonicParsing="false" onAction="#updateRow" onMouseClicked="#updateRow" text="Update row" />
+      <Button fx:id="updateRow1" layoutX="355.0" layoutY="183.0" mnemonicParsing="false" onAction="#addRow" onMouseClicked="#addRow" text="Add row" />
         </children>
     </AnchorPane>

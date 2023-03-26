@@ -80,12 +80,6 @@ public class TableContentVisualizer {
 //            // Пустая строка для вставки новой строки
             tableView.getItems().add(currentRow);
 
-//            ObservableList<String> newRow = FXCollections.observableArrayList();
-//            for (int i = 0; i < metaData.getColumnCount(); i++) {
-//                newRow.add("");
-//            }
-//            tableView.getItems().add(newRow);
-
         } catch (SQLException e) {
             ErrorAlert errorAlert = ErrorAlert
                 .builder()
@@ -114,12 +108,16 @@ public class TableContentVisualizer {
                 String columnName = metaData.getColumnName(i + 1);
                 String columnValue = currentRow.get(i);
                 if (!columnValue.equals("")) {
-                    queryBuilder.append(columnName).append("=").append("'").append(columnValue).append("'");
+                    queryBuilder
+                        .append(columnName)
+                        .append("=")
+                        .append("'")
+                        .append(columnValue)
+                        .append("'");
                     if (i < metaData.getColumnCount() - 1) {
                         queryBuilder.append(",");
                     }
                 }
-
             }
 
             queryBuilder
@@ -180,8 +178,16 @@ public class TableContentVisualizer {
 
     public void addRow(TableView<ObservableList<String>> tableView, TableInfo selectedTableInfo) throws SQLException {
         ObservableList<String> lastRow = tableView.getItems().get(tableView.getItems().size() - 1);
-        StringBuilder query = new StringBuilder("INSERT INTO " + selectedTableInfo.getName() + " VALUES (");
-        for (int i = 0; i < metaData.getColumnCount(); i++) {
+        StringBuilder query = new StringBuilder("INSERT INTO " + selectedTableInfo.getName() + "(");
+        for (int i = 1; i < metaData.getColumnCount(); i++) {
+            query
+                .append(metaData.getColumnName(i + 1));
+            if (i < metaData.getColumnCount() - 1) {
+                query.append(",");
+            }
+        }
+        query.append(") VALUES (");
+        for (int i = 1; i < metaData.getColumnCount(); i++) {
             String value = lastRow.get(i);
             query.append("'").append(value).append("'");
             if (i < metaData.getColumnCount() - 1) {
