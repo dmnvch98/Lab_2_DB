@@ -12,7 +12,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import lombok.AllArgsConstructor;
@@ -38,6 +37,7 @@ public class DBVisualizer {
     private TableView<ForeignKeyInfo> foreignKeyTable;
     private TableView<TableInfo> tableTable = new TableView<>();
     private TableView<ObservableList<String>> tableView = new TableView<>();
+    private Button showTableContentButton;
 
     public void showTables() {
         try {
@@ -45,14 +45,8 @@ public class DBVisualizer {
 
             showForeignKeyInfo();
 
-            tableView.setEditable(true);
-
-            HBox hBox = new HBox(5);
-            Button showButton = new Button("Show Table Contents");
-            showButton.setOnAction(event -> showTableContent());
-
             VBox vBox = new VBox(5);
-            vBox.getChildren().addAll(tableTable, showButton, tableView, foreignKeyTable);
+            vBox.getChildren().addAll(tableTable, showTableContentButton, tableView, foreignKeyTable);
 
             BorderPane borderPane = new BorderPane(vBox);
             Scene scene = new Scene(borderPane, 1200, 1000);
@@ -94,6 +88,8 @@ public class DBVisualizer {
         TableColumn<TableInfo, String> engineColumn = new TableColumn<>("Engine");
         engineColumn.setCellValueFactory(new PropertyValueFactory<>("engine"));
         tableTable.getColumns().addAll(nameColumn, engineColumn);
+        showTableContentButton = new Button("Show Table Contents");
+        showTableContentButton.setOnAction(event -> showTableContent());
     }
 
     private void showForeignKeyInfo() {
@@ -123,17 +119,17 @@ public class DBVisualizer {
         String oldValue = rowValue.get(colNo);
         if (!newValue.equals(oldValue)) {
             try {
-                String updateQuery = "UPDATE " + selectedTableInfo.getName() + " SET " + metaData.getColumnName(colNo + 1) + "='" + newValue + "' WHERE ";
+                StringBuilder updateQuery = new StringBuilder("UPDATE " + selectedTableInfo.getName() + " SET " + metaData.getColumnName(colNo + 1) + "='" + newValue + "' WHERE ");
                 for (int j = 1; j <= metaData.getColumnCount(); j++) {
                     if (j != colNo + 1) {
-                        updateQuery += metaData.getColumnName(j) + "='" + rowValue.get(j - 1) + "' AND ";
+                        updateQuery.append(metaData.getColumnName(j)).append("='").append(rowValue.get(j - 1)).append("' AND ");
                     }
                 }
-                updateQuery = updateQuery.substring(0, updateQuery.length() - 5);
+                updateQuery = new StringBuilder(updateQuery.substring(0, updateQuery.length() - 5));
 
                 long startTime = System.currentTimeMillis();
 
-                int rowsUpdated = databaseManager.executeUpdate(updateQuery);
+                int rowsUpdated = databaseManager.executeUpdate(updateQuery.toString());
 
                 long endTime = System.currentTimeMillis();
                 AtomicLong executionTime = new AtomicLong(endTime - startTime);
@@ -186,6 +182,7 @@ public class DBVisualizer {
                 .build();
             infoAlert.showAlert();
 
+            tableView.setEditable(true);
             tableView.setItems(data);
             tableView.getColumns().clear();
             for (int i = 1; i <= metaData.getColumnCount(); i++) {
