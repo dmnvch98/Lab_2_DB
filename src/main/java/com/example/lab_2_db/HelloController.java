@@ -1,13 +1,16 @@
 package com.example.lab_2_db;
 
 import com.example.lab_2_db.database.*;
+import com.example.lab_2_db.model.ForeignKeyInfo;
+import com.example.lab_2_db.model.TableInfo;
+import com.example.lab_2_db.visualizers.ForeignKeyVisualizer;
+import com.example.lab_2_db.visualizers.TableContentVisualizer;
+import com.example.lab_2_db.visualizers.TableInfoVisuallizer;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
-import javafx.scene.input.MouseEvent;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -70,7 +73,7 @@ public class HelloController implements Initializable {
         tablesInfo.setItems(tableView.getItems());
     }
     @FXML
-    private void initTableContent() throws SQLException {
+    private void initTableContent() {
         TableInfo selectedTableInfo = tablesInfo.getSelectionModel().getSelectedItem();
         tableContentVisualizer = new TableContentVisualizer(databaseManager);
         tableContent.setItems(tableContentVisualizer.getTableContent(selectedTableInfo, tableContent).getItems());
@@ -91,7 +94,7 @@ public class HelloController implements Initializable {
         tableContentVisualizer.updateTable(tableContent, tablesInfo.getSelectionModel().getSelectedItem());
     }
 
-    public void initForeignKeyInfo(String selectedTable) throws SQLException {
+    public void initForeignKeyInfo(String selectedTable) {
         ForeignKeyVisualizer foreignKeyVisualizer = new ForeignKeyVisualizer(databaseManager);
         TableView<ForeignKeyInfo> foreignKeyInfo1 =
             foreignKeyVisualizer.showForeignKeyInfo(foreignKeyInfo, selectedTable);

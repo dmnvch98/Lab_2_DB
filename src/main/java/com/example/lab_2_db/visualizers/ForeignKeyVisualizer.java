@@ -1,5 +1,8 @@
-package com.example.lab_2_db.database;
+package com.example.lab_2_db.visualizers;
 
+import com.example.lab_2_db.alerts.ErrorAlert;
+import com.example.lab_2_db.database.DatabaseManager;
+import com.example.lab_2_db.model.ForeignKeyInfo;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
@@ -15,10 +18,18 @@ import java.sql.SQLException;
 public class ForeignKeyVisualizer {
     private final DatabaseManager databaseManager;
 
-    public TableView<ForeignKeyInfo> showForeignKeyInfo(TableView<ForeignKeyInfo> foreignKeyTable, String tableName) throws SQLException {
+    public TableView<ForeignKeyInfo> showForeignKeyInfo(TableView<ForeignKeyInfo> foreignKeyTable, String tableName) {
         foreignKeyTable.getColumns().clear();
-        ObservableList<ForeignKeyInfo> foreignKeyData =
-            FXCollections.observableArrayList(databaseManager.getForeignKeyInfos(tableName));
+        ObservableList<ForeignKeyInfo> foreignKeyData = null;
+        try {
+            foreignKeyData = FXCollections.observableArrayList(databaseManager.getForeignKeyInfos(tableName));
+        } catch (SQLException e) {
+            ErrorAlert errorAlert = ErrorAlert
+                .builder()
+                .message("Error getting foreign keys: " + e.getMessage())
+                .build();
+            errorAlert.showAlert();
+        }
         foreignKeyTable.setItems(foreignKeyData);
         foreignKeyTable.setEditable(false);
 

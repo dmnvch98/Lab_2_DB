@@ -1,4 +1,4 @@
-package com.example.lab_2_db.database;
+package com.example.lab_2_db.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

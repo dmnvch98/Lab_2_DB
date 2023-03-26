@@ -1,6 +1,8 @@
-package com.example.lab_2_db.database;
+package com.example.lab_2_db.visualizers;
 
 import com.example.lab_2_db.alerts.ErrorAlert;
+import com.example.lab_2_db.database.DatabaseManager;
+import com.example.lab_2_db.model.TableInfo;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
