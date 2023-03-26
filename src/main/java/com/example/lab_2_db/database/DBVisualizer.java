@@ -20,40 +20,25 @@ import lombok.Data;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
 public class DBVisualizer {
+    public DBVisualizer(DatabaseManager databaseManager) {
+        this.databaseManager = databaseManager;
+    }
+
     private final DatabaseManager databaseManager;
+    private List<TableInfo> tableInfos = new ArrayList<>();
+    private List<ForeignKeyInfo> foreignKeyInfos = new ArrayList<>();
+    private TableView<TableInfo> tableTable = new TableView<>();
 
     public void showTables() {
         try {
-            List<TableInfo> tableInfos = databaseManager.getTableInfos();
-            List<ForeignKeyInfo> foreignKeyInfos = tableInfos
-                .stream()
-                .map(tableInfo -> {
-                    try {
-                        return databaseManager
-                            .getForeignKeyInfos(tableInfo.getName());
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).flatMap(List::stream)
-                .collect(Collectors.toList());
-
-            ObservableList<TableInfo> tableData = FXCollections.observableArrayList(tableInfos);
-            TableView<TableInfo> tableTable = new TableView<>();
-            tableTable.setItems(tableData);
-            tableTable.setEditable(false);
-
-            TableColumn<TableInfo, String> nameColumn = new TableColumn<>("Table Name");
-            nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-            TableColumn<TableInfo, String> engineColumn = new TableColumn<>("Engine");
-            engineColumn.setCellValueFactory(new PropertyValueFactory<>("engine"));
-            tableTable.getColumns().addAll(nameColumn, engineColumn);
+            showTablesInfo();
 
             ObservableList<ForeignKeyInfo> foreignKeyData = FXCollections.observableArrayList(foreignKeyInfos);
             TableView<ForeignKeyInfo> foreignKeyTable = new TableView<>();
@@ -166,6 +151,31 @@ public class DBVisualizer {
             System.out.println("Error getting table or foreign key info: " + e.getMessage());
 //            Utils.showErrorAlert("Error getting table or foreign key info: " + e.getMessage());
         }
+    }
+    private void showTablesInfo() throws SQLException {
+        tableInfos = databaseManager.getTableInfos();
+        foreignKeyInfos = tableInfos
+            .stream()
+            .map(tableInfo -> {
+                try {
+                    return databaseManager
+                        .getForeignKeyInfos(tableInfo.getName());
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }).flatMap(List::stream)
+            .toList();
+
+        ObservableList<TableInfo> tableData = FXCollections.observableArrayList(tableInfos);
+        tableTable = new TableView<>();
+        tableTable.setItems(tableData);
+        tableTable.setEditable(false);
+
+        TableColumn<TableInfo, String> nameColumn = new TableColumn<>("Table Name");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        TableColumn<TableInfo, String> engineColumn = new TableColumn<>("Engine");
+        engineColumn.setCellValueFactory(new PropertyValueFactory<>("engine"));
+        tableTable.getColumns().addAll(nameColumn, engineColumn);
     }
 }
 
