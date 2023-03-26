@@ -1,10 +1,11 @@
 package com.example.lab_2_db.database;
 
+import com.example.lab_2_db.alerts.ErrorAlert;
+import com.example.lab_2_db.alerts.InfoAlert;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -73,10 +74,11 @@ public class DBVisualizer {
                         data.add(row);
                     }
 
-                    Alert getTableInfoAlert = new Alert(Alert.AlertType.INFORMATION);
-                    getTableInfoAlert.setTitle("Update Successful");
-                    getTableInfoAlert.setContentText("Rows get: " + count + "\nExecution time: " + executionTime + " ms");
-                    getTableInfoAlert.showAndWait();
+                    InfoAlert infoAlert = InfoAlert
+                        .builder()
+                        .message("Rows get: " + count + "\nExecution time: " + executionTime + " ms")
+                        .build();
+                    infoAlert.showAlert();
 
                     tableView.setItems(data);
                     tableView.getColumns().clear();
@@ -103,12 +105,18 @@ public class DBVisualizer {
                                     long endTime = System.currentTimeMillis();
                                     executionTime.set(endTime - startTime);
 
-                                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                                    alert.setTitle("Update Successful");
-                                    alert.setContentText("Rows updated: " + rowsUpdated + "\nExecution time: " + executionTime + " ms");
-                                    alert.showAndWait();
+                                    InfoAlert updateAlert = InfoAlert
+                                        .builder()
+                                        .message("Rows get: " + rowsUpdated + "\nExecution time: " + executionTime + " ms")
+                                        .build();
+                                    updateAlert.showAlert();
+
                                 } catch (SQLException e) {
-                                    System.out.println("Error updating value in database: " + e.getMessage());
+                                    ErrorAlert errorAlert = ErrorAlert
+                                        .builder()
+                                        .message("Error updating value in database: " + e.getMessage())
+                                        .build();
+                                    errorAlert.showAlert();
                                 }
                             }
                             rowValue.set(colNo, newValue);
@@ -116,10 +124,11 @@ public class DBVisualizer {
                         tableView.getColumns().add(column);
                     }
                 } catch (SQLException e) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Error executing query");
-                    alert.setContentText(e.getMessage());
-                    alert.showAndWait();
+                    ErrorAlert errorAlert = ErrorAlert
+                        .builder()
+                        .message("Error executing query: " + e.getMessage())
+                        .build();
+                    errorAlert.showAlert();
                 }
             });
 
@@ -134,10 +143,14 @@ public class DBVisualizer {
             stage.setTitle("Database Visualizer");
             stage.show();
         } catch (SQLException e) {
-            System.out.println("Error getting table or foreign key info: " + e.getMessage());
-//            Utils.showErrorAlert("Error getting table or foreign key info: " + e.getMessage());
+            ErrorAlert errorAlert = ErrorAlert
+                .builder()
+                .message("Error getting table or foreign key info: " + e.getMessage())
+                .build();
+            errorAlert.showAlert();
         }
     }
+
     private void showTablesInfo() throws SQLException {
         tableInfos = databaseManager.getTableInfos();
         foreignKeyInfos = tableInfos
