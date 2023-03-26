@@ -3,9 +3,11 @@ package com.example.lab_2_db;
 import com.example.lab_2_db.database.*;
 import com.example.lab_2_db.model.ForeignKeyInfo;
 import com.example.lab_2_db.model.TableInfo;
+import com.example.lab_2_db.model.UserInfo;
 import com.example.lab_2_db.visualizers.ForeignKeyVisualizer;
 import com.example.lab_2_db.visualizers.TableContentVisualizer;
 import com.example.lab_2_db.visualizers.TableInfoVisuallizer;
+import com.example.lab_2_db.visualizers.UsersVisualizers;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -26,6 +28,8 @@ public class HelloController implements Initializable {
     private DatabaseManager databaseManager;
     private TableContentVisualizer tableContentVisualizer;
     @FXML
+    private TableView<UserInfo> users;
+    @FXML
     public Button updateRow;
     @FXML
     public Button addRow;
@@ -45,6 +49,7 @@ public class HelloController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         initDB();
+        initUsers();
         initTablesInfo();
     }
 
@@ -99,5 +104,11 @@ public class HelloController implements Initializable {
         TableView<ForeignKeyInfo> foreignKeyInfo1 =
             foreignKeyVisualizer.showForeignKeyInfo(foreignKeyInfo, selectedTable);
         foreignKeyInfo.setItems(foreignKeyInfo1.getItems());
+    }
+
+    public void initUsers() {
+        UsersVisualizers usersVisualizers = new UsersVisualizers(databaseManager);
+        TableView<UserInfo> usersFromDb = usersVisualizers.getUsers(users);
+        users.setItems(usersFromDb.getItems());
     }
 }

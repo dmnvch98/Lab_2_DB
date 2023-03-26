@@ -24,20 +24,6 @@ public class DatabaseManager {
         return statement.executeUpdate(query);
     }
 
-    public void modifyDatabase(String query) throws SQLException {
-        Statement statement = connection.createStatement();
-        statement.execute(query);
-    }
-
-    public List<String> getTableNames() throws SQLException {
-        List<String> tableNames = new ArrayList<>();
-        ResultSet rs = executeQuery("SHOW TABLES");
-        while (rs.next()) {
-            tableNames.add(rs.getString(1));
-        }
-        return tableNames;
-    }
-
     public List<TableInfo> getTableInfos() throws SQLException {
         List<TableInfo> tableInfos = new ArrayList<>();
         ResultSet resultSet = executeQuery("SHOW TABLE STATUS");
