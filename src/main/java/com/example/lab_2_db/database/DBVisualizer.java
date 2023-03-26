@@ -34,28 +34,14 @@ public class DBVisualizer {
     private final DatabaseManager databaseManager;
     private List<TableInfo> tableInfos = new ArrayList<>();
     private List<ForeignKeyInfo> foreignKeyInfos = new ArrayList<>();
+    private TableView<ForeignKeyInfo> foreignKeyTable;
     private TableView<TableInfo> tableTable = new TableView<>();
 
     public void showTables() {
         try {
             showTablesInfo();
 
-            ObservableList<ForeignKeyInfo> foreignKeyData = FXCollections.observableArrayList(foreignKeyInfos);
-            TableView<ForeignKeyInfo> foreignKeyTable = new TableView<>();
-            foreignKeyTable.setItems(foreignKeyData);
-            foreignKeyTable.setEditable(false);
-
-            TableColumn<ForeignKeyInfo, String> constraintNameColumn = new TableColumn<>("Constraint Name");
-            constraintNameColumn.setCellValueFactory(new PropertyValueFactory<>("constraintName"));
-            TableColumn<ForeignKeyInfo, String> tableNameColumn = new TableColumn<>("Table Name");
-            tableNameColumn.setCellValueFactory(new PropertyValueFactory<>("tableName"));
-            TableColumn<ForeignKeyInfo, String> columnNameColumn = new TableColumn<>("Column Name");
-            columnNameColumn.setCellValueFactory(new PropertyValueFactory<>("columnName"));
-            TableColumn<ForeignKeyInfo, String> referencedTableNameColumn = new TableColumn<>("Referenced Table Name");
-            referencedTableNameColumn.setCellValueFactory(new PropertyValueFactory<>("referencedTableName"));
-            TableColumn<ForeignKeyInfo, String> referencedColumnNameColumn = new TableColumn<>("Referenced Column Name");
-            referencedColumnNameColumn.setCellValueFactory(new PropertyValueFactory<>("referencedColumnName"));
-            foreignKeyTable.getColumns().addAll(constraintNameColumn, tableNameColumn, columnNameColumn, referencedTableNameColumn, referencedColumnNameColumn);
+            showForeignKeyInfo();
 
             TableView<ObservableList<String>> tableView = new TableView<>();
             tableView.setEditable(true);
@@ -176,6 +162,26 @@ public class DBVisualizer {
         TableColumn<TableInfo, String> engineColumn = new TableColumn<>("Engine");
         engineColumn.setCellValueFactory(new PropertyValueFactory<>("engine"));
         tableTable.getColumns().addAll(nameColumn, engineColumn);
+    }
+
+    private void showForeignKeyInfo() {
+        ObservableList<ForeignKeyInfo> foreignKeyData = FXCollections.observableArrayList(foreignKeyInfos);
+        foreignKeyTable = new TableView<>();
+        foreignKeyTable.setItems(foreignKeyData);
+        foreignKeyTable.setEditable(false);
+
+        TableColumn<ForeignKeyInfo, String> constraintNameColumn = new TableColumn<>("Constraint Name");
+        constraintNameColumn.setCellValueFactory(new PropertyValueFactory<>("constraintName"));
+        TableColumn<ForeignKeyInfo, String> tableNameColumn = new TableColumn<>("Table Name");
+        tableNameColumn.setCellValueFactory(new PropertyValueFactory<>("tableName"));
+        TableColumn<ForeignKeyInfo, String> columnNameColumn = new TableColumn<>("Column Name");
+        columnNameColumn.setCellValueFactory(new PropertyValueFactory<>("columnName"));
+        TableColumn<ForeignKeyInfo, String> referencedTableNameColumn = new TableColumn<>("Referenced Table Name");
+        referencedTableNameColumn.setCellValueFactory(new PropertyValueFactory<>("referencedTableName"));
+        TableColumn<ForeignKeyInfo, String> referencedColumnNameColumn = new TableColumn<>("Referenced Column Name");
+        referencedColumnNameColumn.setCellValueFactory(new PropertyValueFactory<>("referencedColumnName"));
+        foreignKeyTable.getColumns().addAll(constraintNameColumn, tableNameColumn, columnNameColumn, referencedTableNameColumn, referencedColumnNameColumn);
+
     }
 }
 
