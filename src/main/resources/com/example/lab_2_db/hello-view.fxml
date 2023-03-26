@@ -3,23 +3,16 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.VBox?>
-<VBox xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.lab_2_db.HelloController">
+
     <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0"
-                prefWidth="800.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+                prefWidth="800.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1"
+                fx:controller="com.example.lab_2_db.HelloController">
         <children>
-            <TableView fx:id="tableInfo" prefHeight="173.0" prefWidth="375.0">
+            <TableView fx:id="tablesInfo" prefHeight="173.0" prefWidth="375.0">
             </TableView>
             <ButtonBar layoutX="155.0" layoutY="315.0" prefHeight="40.0" prefWidth="200.0"/>
-            <Button id="showTableContent" fx:id="showTableContent" layoutX="10.0" layoutY="183.0"
-                    mnemonicParsing="false" text="Show table content"/>
-            <TableView fx:id="tableContent" layoutY="214.0" prefHeight="200.0" prefWidth="800.0">
-                <columns>
-                    <TableColumn prefWidth="75.0" text="C1"/>
-                    <TableColumn prefWidth="75.0" text="C2"/>
-                </columns>
-            </TableView>
+            <Button id="showTableContent" fx:id="showTableContent" layoutX="10.0" layoutY="183.0" mnemonicParsing="false"
+                    onMouseClicked="#initTableContent" text="Show table content" />
+            <TableView fx:id="tableContent" layoutY="214.0" prefHeight="200.0" prefWidth="800.0"/>
         </children>
     </AnchorPane>
-</VBox>

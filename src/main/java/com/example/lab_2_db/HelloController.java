@@ -1,14 +1,17 @@
 package com.example.lab_2_db;
 
 import com.example.lab_2_db.database.DatabaseManager;
+import com.example.lab_2_db.database.TableContentVisualizer;
 import com.example.lab_2_db.database.TableInfo;
 import com.example.lab_2_db.database.TableInfoVisuallizer;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.w3c.dom.events.MouseEvent;
 
 import java.net.URL;
 import java.sql.Connection;
@@ -19,19 +22,21 @@ import java.util.ResourceBundle;
 @Data
 @NoArgsConstructor
 public class HelloController implements Initializable {
+    private DatabaseManager databaseManager;
 
     @FXML
     private Button showTableContent;
 
     @FXML
-    private TableView<?> tableContent;
+    private TableView<ObservableList<String>> tableContent;
 
     @FXML
-    private TableView<TableInfo> tableInfo;
+    private TableView<TableInfo> tablesInfo;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         initDB();
+        initTablesInfo();
     }
 
     private void initDB() {
@@ -44,16 +49,23 @@ public class HelloController implements Initializable {
             throw new RuntimeException(e);
         }
 
-        Connection connection = null;
+        Connection connection;
         try {
             connection = DriverManager.getConnection(url, user, password);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        DatabaseManager databaseManager = new DatabaseManager(connection);
+        databaseManager = new DatabaseManager(connection);
+    }
 
+    private void initTablesInfo() {
         TableInfoVisuallizer tableInfoVisuallizer = new TableInfoVisuallizer(databaseManager);
-        TableView<TableInfo> tableView = tableInfoVisuallizer.getTablesInfo(tableInfo);
-        tableInfo.setItems(tableView.getItems());
+        TableView<TableInfo> tableView = tableInfoVisuallizer.getTablesInfo(tablesInfo);
+        tablesInfo.setItems(tableView.getItems());
+    }
+    @FXML
+    private void initTableContent() {
+        TableContentVisualizer tableContentVisualizer = new TableContentVisualizer(databaseManager);
+        tableContent.setItems(tableContentVisualizer.getTableContent(tablesInfo, tableContent).getItems());
     }
 }
