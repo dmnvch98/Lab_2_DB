@@ -16,6 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -26,6 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Data
 @AllArgsConstructor
+@Getter
 public class DBVisualizer {
     public DBVisualizer(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
