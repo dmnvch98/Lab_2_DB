@@ -14,6 +14,8 @@ import lombok.Data;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Data
@@ -25,7 +27,7 @@ public class TableContentVisualizer {
 
     private final DatabaseManager databaseManager;
     private ResultSetMetaData metaData;
-    private ObservableList<String> currentRow;
+    private ObservableList<String> editedRow;
 
     public TableView<ObservableList<String>> getTableContent(TableInfo selectedTableInfo, TableView<ObservableList<String>> tableView) {
         if (selectedTableInfo == null) {
@@ -57,9 +59,9 @@ public class TableContentVisualizer {
                 .build();
             infoAlert.showAlert();
 
-            currentRow = FXCollections.observableArrayList();
+            editedRow = FXCollections.observableArrayList();
             for (int i = 0; i < metaData.getColumnCount(); i++) {
-                currentRow.add("");
+                editedRow.add("");
             }
 
 
@@ -73,12 +75,12 @@ public class TableContentVisualizer {
                 column.setCellFactory(TextFieldTableCell.forTableColumn());
 
                 column.setOnEditCommit(event -> {
-                    currentRow.set(colNo, event.getNewValue());
+                    editedRow.set(colNo, event.getNewValue());
                 });
                 tableView.getColumns().add(column);
             }
 //            // Пустая строка для вставки новой строки
-            tableView.getItems().add(currentRow);
+            tableView.getItems().add(editedRow);
 
         } catch (SQLException e) {
             ErrorAlert errorAlert = ErrorAlert
@@ -91,7 +93,7 @@ public class TableContentVisualizer {
     }
 
     public void updateTable(TableView<ObservableList<String>> tableView, TableInfo selectedTableInfo) {
-        if (currentRow == null || currentRow.isEmpty()) {
+        if (editedRow == null || editedRow.isEmpty()) {
             return;
         }
         ObservableList<ObservableList<String>> selectedRows = tableView.getSelectionModel().getSelectedItems();
@@ -104,9 +106,11 @@ public class TableContentVisualizer {
         try {
             String tableName = selectedTableInfo.getName();
             StringBuilder queryBuilder = new StringBuilder("UPDATE " + tableName + " SET ");
+            List<Integer> updatedColumnIndexes = new ArrayList<>();
             for (int i = 0; i < metaData.getColumnCount(); i++) {
                 String columnName = metaData.getColumnName(i + 1);
-                String columnValue = currentRow.get(i);
+                String columnValue = editedRow.get(i);
+                updatedColumnIndexes.add(i);
                 if (!columnValue.equals("")) {
                     queryBuilder
                         .append(columnName)
@@ -114,7 +118,14 @@ public class TableContentVisualizer {
                         .append("'")
                         .append(columnValue)
                         .append("'");
-                    if (i < metaData.getColumnCount() - 1) {
+
+                    // Если не последний элемент и если оставшиеся колонки не пустые
+                    if (i < metaData.getColumnCount() - 1
+                        && !editedRow
+                        .subList(i + 1, editedRow.size())
+                        .stream().allMatch(String::isEmpty)
+                    )
+                    {
                         queryBuilder.append(",");
                     }
                 }
@@ -212,7 +223,5 @@ public class TableContentVisualizer {
                 .build();
             errorAlert.showAlert();
         }
-
     }
-
 }

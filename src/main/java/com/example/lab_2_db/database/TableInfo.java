@@ -9,5 +9,6 @@ public class TableInfo {
     private String name;
     private String engine;
     private String primaryKey;
+    private String updateTime;
 }
 

@@ -42,7 +42,10 @@ public class TableInfoVisuallizer {
         TableColumn<TableInfo, String> primaryKeyColumn = new TableColumn<>("Primary key");
         primaryKeyColumn.setCellValueFactory(new PropertyValueFactory<>("primaryKey"));
 
-        tableInfo.getColumns().addAll(nameColumn, engineColumn, primaryKeyColumn);
+        TableColumn<TableInfo, String> updateTimeKeyColumn = new TableColumn<>("Update time");
+        updateTimeKeyColumn.setCellValueFactory(new PropertyValueFactory<>("updateTime"));
+
+        tableInfo.getColumns().addAll(nameColumn, engineColumn, primaryKeyColumn, updateTimeKeyColumn);
         return tableInfo;
     }
 

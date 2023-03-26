@@ -48,8 +48,9 @@ public class DatabaseManager {
         while (resultSet.next()) {
             String name = resultSet.getString("Name");
             String engine = resultSet.getString("Engine");
+            String updateTime = resultSet.getString("Update_time");
             String primaryKey = getPrimaryKeyName(name);
-            TableInfo tableInfo = new TableInfo(name, engine, primaryKey);
+            TableInfo tableInfo = new TableInfo(name, engine, primaryKey, updateTime);
             tableInfos.add(tableInfo);
         }
 
