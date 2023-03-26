@@ -37,6 +37,7 @@ public class DBVisualizer {
     private List<ForeignKeyInfo> foreignKeyInfos = new ArrayList<>();
     private TableView<ForeignKeyInfo> foreignKeyTable;
     private TableView<TableInfo> tableTable = new TableView<>();
+    private TableView<ObservableList<String>> tableView = new TableView<>();
 
     public void showTables() {
         try {
@@ -44,60 +45,11 @@ public class DBVisualizer {
 
             showForeignKeyInfo();
 
-            TableView<ObservableList<String>> tableView = new TableView<>();
             tableView.setEditable(true);
 
             HBox hBox = new HBox(5);
             Button showButton = new Button("Show Table Contents");
-            showButton.setOnAction(event -> {
-                TableInfo selectedTableInfo = tableTable.getSelectionModel().getSelectedItem();
-                if (selectedTableInfo == null) {
-                    return;
-                }
-
-                try {
-                    long getTableInfoStartTime = System.currentTimeMillis();
-                    ResultSet rs = databaseManager.executeQuery("SELECT * FROM " + selectedTableInfo.getName());
-                    long getTableInfoEndTime = System.currentTimeMillis();
-                    AtomicLong executionTime = new AtomicLong(getTableInfoEndTime - getTableInfoStartTime);
-
-                    ResultSetMetaData metaData = rs.getMetaData();
-                    ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
-                    int count = 0;
-
-                    while (rs.next()) {
-                        count++;
-                        ObservableList<String> row = FXCollections.observableArrayList();
-                        for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                            row.add(rs.getString(i));
-                        }
-                        data.add(row);
-                    }
-
-                    InfoAlert infoAlert = InfoAlert
-                        .builder()
-                        .message("Rows get: " + count + "\nExecution time: " + executionTime + " ms")
-                        .build();
-                    infoAlert.showAlert();
-
-                    tableView.setItems(data);
-                    tableView.getColumns().clear();
-                    for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                        final int colNo = i - 1;
-                        TableColumn<ObservableList<String>, String> column = new TableColumn<>(metaData.getColumnName(i));
-                        column.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().get(colNo)));
-                        column.setCellFactory(TextFieldTableCell.forTableColumn());
-                        column.setOnEditCommit(eventEdit -> updateTable(eventEdit, colNo, selectedTableInfo, metaData));
-                        tableView.getColumns().add(column);
-                    }
-                } catch (SQLException e) {
-                    ErrorAlert errorAlert = ErrorAlert
-                        .builder()
-                        .message("Error executing query: " + e.getMessage())
-                        .build();
-                    errorAlert.showAlert();
-                }
-            });
+            showButton.setOnAction(event -> showTableContent());
 
             VBox vBox = new VBox(5);
             vBox.getChildren().addAll(tableTable, showButton, tableView, foreignKeyTable);
@@ -201,6 +153,56 @@ public class DBVisualizer {
             }
         }
         rowValue.set(colNo, newValue);
+    }
+
+    private void showTableContent() {
+        TableInfo selectedTableInfo = tableTable.getSelectionModel().getSelectedItem();
+        if (selectedTableInfo == null) {
+            return;
+        }
+
+        try {
+            long getTableInfoStartTime = System.currentTimeMillis();
+            ResultSet rs = databaseManager.executeQuery("SELECT * FROM " + selectedTableInfo.getName());
+            long getTableInfoEndTime = System.currentTimeMillis();
+            AtomicLong executionTime = new AtomicLong(getTableInfoEndTime - getTableInfoStartTime);
+
+            ResultSetMetaData metaData = rs.getMetaData();
+            ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
+            int count = 0;
+
+            while (rs.next()) {
+                count++;
+                ObservableList<String> row = FXCollections.observableArrayList();
+                for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                    row.add(rs.getString(i));
+                }
+                data.add(row);
+            }
+
+            InfoAlert infoAlert = InfoAlert
+                .builder()
+                .message("Rows get: " + count + "\nExecution time: " + executionTime + " ms")
+                .build();
+            infoAlert.showAlert();
+
+            tableView.setItems(data);
+            tableView.getColumns().clear();
+            for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                final int colNo = i - 1;
+                TableColumn<ObservableList<String>, String> column = new TableColumn<>(metaData.getColumnName(i));
+                column.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().get(colNo)));
+                column.setCellFactory(TextFieldTableCell.forTableColumn());
+                column.setOnEditCommit(eventEdit -> updateTable(eventEdit, colNo, selectedTableInfo, metaData));
+                tableView.getColumns().add(column);
+            }
+        } catch (SQLException e) {
+            ErrorAlert errorAlert = ErrorAlert
+                .builder()
+                .message("Error executing query: " + e.getMessage())
+                .build();
+            errorAlert.showAlert();
+        }
     }
 }
 
