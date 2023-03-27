@@ -13,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,8 +26,17 @@ import java.util.ResourceBundle;
 @Data
 @NoArgsConstructor
 public class HelloController implements Initializable {
+    @FXML
+    private Button deleteUser;
+    @FXML
+    private Button createUser;
+    @FXML
+    private TextField password;
+    @FXML
+    private TextField username;
     private DatabaseManager databaseManager;
     private TableContentVisualizer tableContentVisualizer;
+    private UsersVisualizers usersVisualizers;
     @FXML
     private TableView<UserInfo> users;
     @FXML
@@ -107,8 +117,22 @@ public class HelloController implements Initializable {
     }
 
     public void initUsers() {
-        UsersVisualizers usersVisualizers = new UsersVisualizers(databaseManager);
+        usersVisualizers = new UsersVisualizers(databaseManager);
         TableView<UserInfo> usersFromDb = usersVisualizers.getUsers(users);
         users.setItems(usersFromDb.getItems());
+    }
+
+    @FXML
+    public void createUser() {
+        usersVisualizers.createUser(username.getText(), password.getText());
+        username.clear();
+        password.clear();
+        initUsers();
+    }
+
+    @FXML
+    public void deleteUser() {
+        usersVisualizers.deleteUser(users.getSelectionModel().getSelectedItem());
+        initUsers();
     }
 }

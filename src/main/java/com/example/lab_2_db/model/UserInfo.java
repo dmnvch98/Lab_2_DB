@@ -9,5 +9,7 @@ import java.util.List;
 @Builder
 public class UserInfo {
     private String username;
+    private String accountLocked;
+    private String passwordExpired;
     private List<String> roles;
 }
