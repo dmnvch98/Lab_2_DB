@@ -2,19 +2,16 @@ package com.example.lab_2_db;
 
 import com.example.lab_2_db.database.*;
 import com.example.lab_2_db.model.ForeignKeyInfo;
+import com.example.lab_2_db.model.Role;
 import com.example.lab_2_db.model.TableInfo;
 import com.example.lab_2_db.model.UserInfo;
-import com.example.lab_2_db.visualizers.ForeignKeyVisualizer;
-import com.example.lab_2_db.visualizers.TableContentVisualizer;
-import com.example.lab_2_db.visualizers.TableInfoVisuallizer;
-import com.example.lab_2_db.visualizers.UsersVisualizers;
+import com.example.lab_2_db.visualizers.*;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.net.URL;
@@ -23,9 +20,14 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
-@Data
 @NoArgsConstructor
 public class HelloController implements Initializable {
+    @FXML
+    private Button showPermissions;
+    @FXML
+    private TableView<Role> userRoles;
+    @FXML
+    private TableView<Role> availableRoles;
     @FXML
     private Button deleteUser;
     @FXML
@@ -115,6 +117,14 @@ public class HelloController implements Initializable {
             foreignKeyVisualizer.showForeignKeyInfo(foreignKeyInfo, selectedTable);
         foreignKeyInfo.setItems(foreignKeyInfo1.getItems());
     }
+    public void getUserRoles() {
+        RolesVisualizers rolesVisualizers = new RolesVisualizers(databaseManager);
+        TableView<Role> rolesFromDb = rolesVisualizers.getUserRolesTableView(users, userRoles);
+        TableView<Role> availableToAssigneeRolesFromDb =
+            rolesVisualizers.getAvailableToAssigneeRoles(availableRoles, users.getSelectionModel().getSelectedItem());
+        userRoles.setItems(rolesFromDb.getItems());
+        availableRoles.setItems(availableToAssigneeRolesFromDb.getItems());
+    }
 
     public void initUsers() {
         usersVisualizers = new UsersVisualizers(databaseManager);
@@ -135,4 +145,5 @@ public class HelloController implements Initializable {
         usersVisualizers.deleteUser(users.getSelectionModel().getSelectedItem());
         initUsers();
     }
+
 }

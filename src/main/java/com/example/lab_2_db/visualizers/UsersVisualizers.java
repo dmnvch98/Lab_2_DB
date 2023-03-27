@@ -3,18 +3,15 @@ package com.example.lab_2_db.visualizers;
 import com.example.lab_2_db.alerts.ErrorAlert;
 import com.example.lab_2_db.alerts.InfoAlert;
 import com.example.lab_2_db.database.DatabaseManager;
-import com.example.lab_2_db.model.ForeignKeyInfo;
 import com.example.lab_2_db.model.UserInfo;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.SelectionModel;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -61,7 +58,7 @@ public class UsersVisualizers {
         } catch (SQLException e) {
             ErrorAlert errorAlert = ErrorAlert
                 .builder()
-                .message("Error while getting the users: " + e.getMessage())
+                .message("Error while getting users: " + e.getMessage())
                 .build();
             errorAlert.showAlert();
         }

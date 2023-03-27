@@ -6,21 +6,22 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="750.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.lab_2_db.HelloController">
-        <children>
-            <TableView fx:id="tablesInfo" prefHeight="173.0" prefWidth="457.0">
-            </TableView>
-            <ButtonBar layoutX="155.0" layoutY="315.0" prefHeight="40.0" prefWidth="200.0" />
-            <Button id="showTableContent" fx:id="showTableContent" layoutX="10.0" layoutY="183.0" mnemonicParsing="false" onMouseClicked="#initTableContent" text="Show table content" />
-            <TableView fx:id="tableContent" layoutY="214.0" prefHeight="252.0" prefWidth="1100.0" />
-      <Button fx:id="deleteContentTableRow" layoutX="155.0" layoutY="183.0" mnemonicParsing="false" onMouseClicked="#deleteContentTableRow" text="Delete row" />
-      <Button fx:id="updateRow" layoutX="254.0" layoutY="183.0" mnemonicParsing="false" onAction="#updateRow" onMouseClicked="#updateRow" text="Update row" />
-      <Button fx:id="updateRow1" layoutX="355.0" layoutY="183.0" mnemonicParsing="false" onAction="#addRow" onMouseClicked="#addRow" text="Add row" />
-      <TableView fx:id="foreignKeyInfo" layoutX="455.0" prefHeight="173.0" prefWidth="645.0" />
-      <TableView fx:id="users" layoutY="499.0" prefHeight="195.0" prefWidth="436.0" />
-      <TextField fx:id="username" layoutX="14.0" layoutY="707.0" promptText="username" />
-      <TextField fx:id="password" layoutX="182.0" layoutY="707.0" promptText="password" />
-      <Button fx:id="createUser" layoutX="355.0" layoutY="706.0" mnemonicParsing="false" onMouseClicked="#createUser" text="Create user" />
-      <Button fx:id="deleteUser" layoutX="356.0" layoutY="469.0" mnemonicParsing="false" onMouseClicked="#deleteUser" text="Delete user" />
-        </children>
-    </AnchorPane>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.lab_2_db.HelloController">
+    <TableView fx:id="tablesInfo" prefHeight="173.0" prefWidth="457.0">
+    </TableView>
+    <ButtonBar layoutX="155.0" layoutY="315.0" prefHeight="40.0" prefWidth="200.0" />
+    <Button id="showTableContent" fx:id="showTableContent" layoutX="10.0" layoutY="183.0" mnemonicParsing="false" onMouseClicked="#initTableContent" text="Show table content" />
+    <TableView fx:id="tableContent" layoutY="214.0" prefHeight="252.0" prefWidth="1100.0" />
+    <Button fx:id="deleteContentTableRow" layoutX="155.0" layoutY="183.0" mnemonicParsing="false" onMouseClicked="#deleteContentTableRow" text="Delete row" />
+    <Button fx:id="updateRow" layoutX="254.0" layoutY="183.0" mnemonicParsing="false" onMouseClicked="#updateRow" text="Update row" />
+    <Button fx:id="addRow" layoutX="355.0" layoutY="183.0" mnemonicParsing="false" onMouseClicked="#addRow" text="Add row" />
+    <TableView fx:id="foreignKeyInfo" layoutX="455.0" prefHeight="173.0" prefWidth="645.0" />
+    <TableView fx:id="users" layoutY="499.0" prefHeight="195.0" prefWidth="436.0" />
+    <TextField fx:id="username" layoutX="908.0" layoutY="499.0" promptText="username" />
+    <TextField fx:id="password" layoutX="908.0" layoutY="544.0" promptText="password" />
+    <Button fx:id="createUser" layoutX="908.0" layoutY="590.0" mnemonicParsing="false" onMouseClicked="#createUser" prefHeight="26.0" prefWidth="160.0" text="Create user" />
+    <Button fx:id="deleteUser" layoutX="14.0" layoutY="469.0" mnemonicParsing="false" onMouseClicked="#deleteUser" text="Delete user" />
+    <TableView fx:id="userRoles" layoutX="436.0" layoutY="499.0" prefHeight="195.0" prefWidth="222.0" />
+    <TableView fx:id="availableRoles" layoutX="656.0" layoutY="499.0" prefHeight="195.0" prefWidth="281.0" />
+    <Button fx:id="showPermissions" layoutX="112.0" layoutY="469.0" mnemonicParsing="false" onMouseClicked="#getUserRoles" text="Show permissions" />
+</AnchorPane>
