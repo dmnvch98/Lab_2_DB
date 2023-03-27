@@ -2,7 +2,7 @@ package com.example.lab_2_db;
 
 import com.example.lab_2_db.database.DatabaseManager;
 import com.example.lab_2_db.model.ForeignKeyInfo;
-import com.example.lab_2_db.model.Role;
+import com.example.lab_2_db.model.RoleInfo;
 import com.example.lab_2_db.model.TableInfo;
 import com.example.lab_2_db.model.UserInfo;
 import com.example.lab_2_db.visualizers.*;
@@ -21,13 +21,13 @@ import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 @NoArgsConstructor
-public class HelloController implements Initializable {
+public class Controller implements Initializable {
     @FXML
     private Button showPermissions;
     @FXML
-    private TableView<Role> userRoles;
+    private TableView<RoleInfo> userRoles;
     @FXML
-    private TableView<Role> availableRoles;
+    private TableView<RoleInfo> availableRoles;
     @FXML
     private Button deleteUser;
     @FXML
@@ -69,9 +69,9 @@ public class HelloController implements Initializable {
     }
 
     private void initDB() {
-        String url = "jdbc:mysql://localhost:3306/mydb";
+        String url = "jdbc:mysql://localhost:3308/mydb";
         String user = "root";
-        String password = "Jeka31312565";
+        String password = "root";
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
@@ -125,14 +125,14 @@ public class HelloController implements Initializable {
 
     public void getUserRoles() {
         rolesVisualizers = new RolesVisualizers(databaseManager);
-        TableView<Role> rolesFromDb = rolesVisualizers.getUserRolesTableView(users, userRoles);
+        TableView<RoleInfo> rolesFromDb = rolesVisualizers.getUserRolesTableView(users, userRoles);
         userRoles.setItems(rolesFromDb.getItems());
 
         getAvailableUserRoles();
     }
 
     public void getAvailableUserRoles() {
-        TableView<Role> availableToAssigneeRolesFromDb =
+        TableView<RoleInfo> availableToAssigneeRolesFromDb =
             rolesVisualizers.getAvailableToAssigneeRoles(availableRoles, users.getSelectionModel().getSelectedItem());
         availableRoles.setItems(availableToAssigneeRolesFromDb.getItems());
     }

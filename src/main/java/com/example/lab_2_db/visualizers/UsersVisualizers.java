@@ -20,13 +20,11 @@ import java.util.concurrent.atomic.AtomicLong;
 @AllArgsConstructor
 public class UsersVisualizers {
     private final DatabaseManager databaseManager;
-    public static final String request = "SELECT * FROM mysql.user;";
-    public static final String CREATE_USER_REQUEST = "CREATE USER '?'@'localhost' IDENTIFIED BY '?';";
 
     public TableView<UserInfo> getUsers(TableView<UserInfo> users) {
         try {
             users.getColumns().clear();
-            ResultSet rs = databaseManager.executeQuery(request);
+            ResultSet rs = databaseManager.executeQuery("SELECT * FROM mysql.user;");
             ObservableList<UserInfo> usernames = FXCollections.observableArrayList();
             while (rs.next()) {
                 String username = rs.getString("USER");

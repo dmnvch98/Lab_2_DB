@@ -3,7 +3,7 @@ package com.example.lab_2_db.visualizers;
 import com.example.lab_2_db.alerts.ErrorAlert;
 import com.example.lab_2_db.alerts.InfoAlert;
 import com.example.lab_2_db.database.DatabaseManager;
-import com.example.lab_2_db.model.Role;
+import com.example.lab_2_db.model.RoleInfo;
 import com.example.lab_2_db.model.UserInfo;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -29,28 +29,28 @@ public class RolesVisualizers {
 
     private DatabaseManager databaseManager;
 
-    List<Role> roles = Arrays.asList(
-        Role.builder().role("ALL").build(),
-        Role.builder().role("CREATE").build(),
-        Role.builder().role("DELETE").build(),
-        Role.builder().role("DROP").build(),
-        Role.builder().role("EXECUTE").build(),
-        Role.builder().role("GRANT OPTION").build(),
-        Role.builder().role("INSERT").build(),
-        Role.builder().role("SELECT").build(),
-        Role.builder().role("SHOW DATABASES").build(),
-        Role.builder().role("UPDATE").build()
+    private final List<RoleInfo> ROLES = Arrays.asList(
+        RoleInfo.builder().description("ALL").build(),
+        RoleInfo.builder().description("CREATE").build(),
+        RoleInfo.builder().description("DELETE").build(),
+        RoleInfo.builder().description("DROP").build(),
+        RoleInfo.builder().description("EXECUTE").build(),
+        RoleInfo.builder().description("GRANT OPTION").build(),
+        RoleInfo.builder().description("INSERT").build(),
+        RoleInfo.builder().description("SELECT").build(),
+        RoleInfo.builder().description("SHOW DATABASES").build(),
+        RoleInfo.builder().description("UPDATE").build()
     );
 
-    public TableView<Role> getUserRolesTableView(TableView<UserInfo> users, TableView<Role> rolesTableView) {
+    public TableView<RoleInfo> getUserRolesTableView(TableView<UserInfo> users, TableView<RoleInfo> rolesTableView) {
         rolesTableView.getColumns().clear();
         UserInfo userInfo = users.getSelectionModel().getSelectedItem();
-        ObservableList<Role> rolesObservableList =
+        ObservableList<RoleInfo> rolesObservableList =
             FXCollections.observableArrayList(getListOfUserRoles(userInfo.getUsername()));
         rolesTableView.setItems(rolesObservableList);
 
-        TableColumn<Role, String> rolesColumn = new TableColumn<>("User Roles");
-        rolesColumn.setCellValueFactory(new PropertyValueFactory<>("Role"));
+        TableColumn<RoleInfo, String> rolesColumn = new TableColumn<>("User Roles");
+        rolesColumn.setCellValueFactory(new PropertyValueFactory<>("Description"));
 
         rolesTableView.getColumns().addAll(rolesColumn);
 
@@ -73,7 +73,7 @@ public class RolesVisualizers {
         return roles;
     }
 
-    private List<Role> getListOfUserRoles(String username) {
+    private List<RoleInfo> getListOfUserRoles(String username) {
         try {
             String request = "SHOW GRANTS FOR '" + username + "'@'localhost'";
             ResultSet rs = databaseManager.executeQuery(request);
@@ -86,7 +86,7 @@ public class RolesVisualizers {
                 .stream()
                 .map(RolesVisualizers::extractRolesFromGrant)
                 .flatMap(Collection::stream)
-                .map(role -> Role.builder().role(role).build())
+                .map(role -> RoleInfo.builder().description(role).build())
                 .toList();
         } catch (SQLException e) {
             ErrorAlert errorAlert = ErrorAlert
@@ -98,61 +98,61 @@ public class RolesVisualizers {
         return null;
     }
 
-    public TableView<Role> getAvailableToAssigneeRoles(TableView<Role> tableView, UserInfo userInfo) {
+    public TableView<RoleInfo> getAvailableToAssigneeRoles(TableView<RoleInfo> tableView, UserInfo userInfo) {
         tableView.getColumns().clear();
-        List<Role> availableToAssigneeRolesList = roles.stream()
+        List<RoleInfo> availableToAssigneeRolesList = ROLES.stream()
             .filter(role -> !Objects.requireNonNull(getListOfUserRoles(userInfo.getUsername())).contains(role))
             .toList();
-        ObservableList<Role> availableToAssigneeRolesObservableList =
+        ObservableList<RoleInfo> availableToAssigneeRolesObservableList =
             FXCollections.observableArrayList(availableToAssigneeRolesList);
         tableView.setItems(availableToAssigneeRolesObservableList);
 
-        TableColumn<Role, String> rolesColumn = new TableColumn<>("Available to assignee roles");
-        rolesColumn.setCellValueFactory(new PropertyValueFactory<>("Role"));
+        TableColumn<RoleInfo, String> rolesColumn = new TableColumn<>("Available to assignee roles");
+        rolesColumn.setCellValueFactory(new PropertyValueFactory<>("Description"));
 
         tableView.getColumns().addAll(rolesColumn);
 
         return tableView;
     }
 
-    public void deleteRole(Role role, UserInfo userInfo) {
+    public void deleteRole(RoleInfo role, UserInfo userInfo) {
         try {
-            String request = "REVOKE " + role.getRole() + " ON mysql.* FROM ' " + userInfo.getUsername() + "'@'localhost';";
+            String request = "REVOKE " + role.getDescription() + " ON mysql.* FROM ' " + userInfo.getUsername() + "'@'localhost';";
             long startTime = System.currentTimeMillis();
             databaseManager.executeUpdate(request);
             long endTime = System.currentTimeMillis();
             AtomicLong executionTime = new AtomicLong(endTime - startTime);
             InfoAlert infoAlert = InfoAlert
                 .builder()
-                .message("Role " + role.getRole() + " is deleted from user: " + userInfo.getUsername()
+                .message("Role " + role.getDescription() + " is deleted from user: " + userInfo.getUsername()
                     + " \nExecution time: " + executionTime + " ms")
                 .build();
             infoAlert.showAlert();
         } catch (SQLException e) {
             ErrorAlert errorAlert = ErrorAlert
                 .builder()
-                .message("Error while deleting " + role.getRole() + " role : " + e.getMessage())
+                .message("Error while deleting " + role.getDescription() + " role : " + e.getMessage())
                 .build();
             errorAlert.showAlert();
         }
     }
 
-    public void addRole(Role role, UserInfo userInfo) {
+    public void addRole(RoleInfo role, UserInfo userInfo) {
         try {
-            String request = "GRANT " + role.getRole() + " ON mysql.* TO ' " + userInfo.getUsername() + "'@'localhost';";
+            String request = "GRANT " + role.getDescription() + " ON mysql.* TO ' " + userInfo.getUsername() + "'@'localhost';";
             long startTime = System.currentTimeMillis();
             databaseManager.executeUpdate(request);
             long endTime = System.currentTimeMillis();
             AtomicLong executionTime = new AtomicLong(endTime - startTime);
             InfoAlert infoAlert = InfoAlert
                 .builder()
-                .message("Role " + role.getRole() + " is added to user: " + userInfo.getUsername()
+                .message("Role " + role.getDescription() + " is added to user: " + userInfo.getUsername()
                     + " \nExecution time: " + executionTime + " ms")                .build();
             infoAlert.showAlert();
         } catch (SQLException e) {
             ErrorAlert errorAlert = ErrorAlert
                 .builder()
-                .message("Error while adding " + role.getRole() + " role : " + e.getMessage())
+                .message("Error while adding " + role.getDescription() + " role : " + e.getMessage())
                 .build();
             errorAlert.showAlert();
         }

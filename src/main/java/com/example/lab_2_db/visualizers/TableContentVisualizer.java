@@ -66,7 +66,6 @@ public class TableContentVisualizer {
                 editedRow.add("");
             }
 
-
             tableView.setEditable(true);
             tableView.setItems(data);
             tableView.getColumns().clear();

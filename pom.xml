@@ -72,7 +72,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.example.lab_2_db/com.example.lab_2_db.HelloApplication</mainClass>
+                            <mainClass>com.example.lab_2_db/com.example.lab_2_db.Application</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>

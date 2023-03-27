@@ -7,6 +7,6 @@ import lombok.Value;
 @Value
 @Builder
 @RequiredArgsConstructor
-public class Role {
-    String role;
+public class RoleInfo {
+    String description;
 }
