@@ -1,6 +1,7 @@
 package com.example.lab_2_db.visualizers;
 
 import com.example.lab_2_db.alerts.ErrorAlert;
+import com.example.lab_2_db.alerts.InfoAlert;
 import com.example.lab_2_db.database.DatabaseManager;
 import com.example.lab_2_db.model.Role;
 import com.example.lab_2_db.model.UserInfo;
@@ -15,9 +16,9 @@ import lombok.RequiredArgsConstructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Data
 @RequiredArgsConstructor
@@ -44,20 +45,6 @@ public class RolesVisualizers {
     public TableView<Role> getUserRolesTableView(TableView<UserInfo> users, TableView<Role> rolesTableView) {
         rolesTableView.getColumns().clear();
         UserInfo userInfo = users.getSelectionModel().getSelectedItem();
-        //            String request = "SHOW GRANTS FOR '" + userInfo.getUsername() + "'@'localhost'";
-//            ResultSet rs = databaseManager.executeQuery(request);
-//            List<String> grants = new ArrayList<>();
-//
-//            while (rs.next()) {
-//                grants.add(rs.getString(1));
-//            }
-//            List<Role> rolesList = grants
-//                .stream()
-//                .map(RolesVisualizers::extractRolesFromGrant)
-//                .flatMap(Collection::stream)
-//                .map(role -> Role.builder().role(role).build())
-//                .toList();
-
         ObservableList<Role> rolesObservableList =
             FXCollections.observableArrayList(getListOfUserRoles(userInfo.getUsername()));
         rolesTableView.setItems(rolesObservableList);
@@ -104,7 +91,7 @@ public class RolesVisualizers {
         } catch (SQLException e) {
             ErrorAlert errorAlert = ErrorAlert
                 .builder()
-                .message("Error while getting users: " + e.getMessage())
+                .message("Error while getting roles: " + e.getMessage())
                 .build();
             errorAlert.showAlert();
         }
@@ -126,6 +113,49 @@ public class RolesVisualizers {
         tableView.getColumns().addAll(rolesColumn);
 
         return tableView;
+    }
+
+    public void deleteRole(Role role, UserInfo userInfo) {
+        try {
+            String request = "REVOKE " + role.getRole() + " ON mysql.* FROM ' " + userInfo.getUsername() + "'@'localhost';";
+            long startTime = System.currentTimeMillis();
+            databaseManager.executeUpdate(request);
+            long endTime = System.currentTimeMillis();
+            AtomicLong executionTime = new AtomicLong(endTime - startTime);
+            InfoAlert infoAlert = InfoAlert
+                .builder()
+                .message("Role " + role.getRole() + " is deleted from user: " + userInfo.getUsername()
+                    + " \nExecution time: " + executionTime + " ms")
+                .build();
+            infoAlert.showAlert();
+        } catch (SQLException e) {
+            ErrorAlert errorAlert = ErrorAlert
+                .builder()
+                .message("Error while deleting " + role.getRole() + " role : " + e.getMessage())
+                .build();
+            errorAlert.showAlert();
+        }
+    }
+
+    public void addRole(Role role, UserInfo userInfo) {
+        try {
+            String request = "GRANT " + role.getRole() + " ON mysql.* TO ' " + userInfo.getUsername() + "'@'localhost';";
+            long startTime = System.currentTimeMillis();
+            databaseManager.executeUpdate(request);
+            long endTime = System.currentTimeMillis();
+            AtomicLong executionTime = new AtomicLong(endTime - startTime);
+            InfoAlert infoAlert = InfoAlert
+                .builder()
+                .message("Role " + role.getRole() + " is added to user: " + userInfo.getUsername()
+                    + " \nExecution time: " + executionTime + " ms")                .build();
+            infoAlert.showAlert();
+        } catch (SQLException e) {
+            ErrorAlert errorAlert = ErrorAlert
+                .builder()
+                .message("Error while adding " + role.getRole() + " role : " + e.getMessage())
+                .build();
+            errorAlert.showAlert();
+        }
     }
 }
 

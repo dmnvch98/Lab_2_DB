@@ -1,6 +1,6 @@
 package com.example.lab_2_db;
 
-import com.example.lab_2_db.database.*;
+import com.example.lab_2_db.database.DatabaseManager;
 import com.example.lab_2_db.model.ForeignKeyInfo;
 import com.example.lab_2_db.model.Role;
 import com.example.lab_2_db.model.TableInfo;
@@ -31,6 +31,8 @@ public class HelloController implements Initializable {
     @FXML
     private Button deleteUser;
     @FXML
+    private Button deleteRole;
+    @FXML
     private Button createUser;
     @FXML
     private TextField password;
@@ -39,6 +41,7 @@ public class HelloController implements Initializable {
     private DatabaseManager databaseManager;
     private TableContentVisualizer tableContentVisualizer;
     private UsersVisualizers usersVisualizers;
+    private RolesVisualizers rolesVisualizers;
     @FXML
     private TableView<UserInfo> users;
     @FXML
@@ -89,6 +92,7 @@ public class HelloController implements Initializable {
         TableView<TableInfo> tableView = tableInfoVisuallizer.getTablesInfo(tablesInfo);
         tablesInfo.setItems(tableView.getItems());
     }
+
     @FXML
     private void initTableContent() {
         TableInfo selectedTableInfo = tablesInfo.getSelectionModel().getSelectedItem();
@@ -106,6 +110,7 @@ public class HelloController implements Initializable {
     public void addRow() throws SQLException {
         tableContentVisualizer.addRow(tableContent, tablesInfo.getSelectionModel().getSelectedItem());
     }
+
     @FXML
     public void updateRow() {
         tableContentVisualizer.updateTable(tableContent, tablesInfo.getSelectionModel().getSelectedItem());
@@ -117,12 +122,18 @@ public class HelloController implements Initializable {
             foreignKeyVisualizer.showForeignKeyInfo(foreignKeyInfo, selectedTable);
         foreignKeyInfo.setItems(foreignKeyInfo1.getItems());
     }
+
     public void getUserRoles() {
-        RolesVisualizers rolesVisualizers = new RolesVisualizers(databaseManager);
+        rolesVisualizers = new RolesVisualizers(databaseManager);
         TableView<Role> rolesFromDb = rolesVisualizers.getUserRolesTableView(users, userRoles);
+        userRoles.setItems(rolesFromDb.getItems());
+
+        getAvailableUserRoles();
+    }
+
+    public void getAvailableUserRoles() {
         TableView<Role> availableToAssigneeRolesFromDb =
             rolesVisualizers.getAvailableToAssigneeRoles(availableRoles, users.getSelectionModel().getSelectedItem());
-        userRoles.setItems(rolesFromDb.getItems());
         availableRoles.setItems(availableToAssigneeRolesFromDb.getItems());
     }
 
@@ -144,6 +155,19 @@ public class HelloController implements Initializable {
     public void deleteUser() {
         usersVisualizers.deleteUser(users.getSelectionModel().getSelectedItem());
         initUsers();
+    }
+
+    public void deleteRole() {
+        rolesVisualizers.deleteRole(userRoles.getSelectionModel().getSelectedItem(), users.getSelectionModel().getSelectedItem());
+        getAvailableUserRoles();
+        getUserRoles();
+    }
+
+    public void addRole() {
+        rolesVisualizers.addRole(availableRoles.getSelectionModel().getSelectedItem(),
+            users.getSelectionModel().getSelectedItem());
+        getAvailableUserRoles();
+        getUserRoles();
     }
 
 }

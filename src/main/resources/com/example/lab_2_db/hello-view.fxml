@@ -22,6 +22,8 @@
     <Button fx:id="createUser" layoutX="908.0" layoutY="590.0" mnemonicParsing="false" onMouseClicked="#createUser" prefHeight="26.0" prefWidth="160.0" text="Create user" />
     <Button fx:id="deleteUser" layoutX="14.0" layoutY="469.0" mnemonicParsing="false" onMouseClicked="#deleteUser" text="Delete user" />
     <TableView fx:id="userRoles" layoutX="436.0" layoutY="499.0" prefHeight="195.0" prefWidth="222.0" />
-    <TableView fx:id="availableRoles" layoutX="656.0" layoutY="499.0" prefHeight="195.0" prefWidth="281.0" />
+    <TableView fx:id="availableRoles" layoutX="656.0" layoutY="499.0" prefHeight="195.0" prefWidth="222.0" />
     <Button fx:id="showPermissions" layoutX="112.0" layoutY="469.0" mnemonicParsing="false" onMouseClicked="#getUserRoles" text="Show permissions" />
+   <Button fx:id="deleteRole" layoutX="436.0" layoutY="470.0" mnemonicParsing="false" onMouseClicked="#deleteRole" text="Delete role" />
+   <Button fx:id="addRole" layoutX="656.0" layoutY="470.0" mnemonicParsing="false" onMouseClicked="#addRole" text="Add role" />
 </AnchorPane>
